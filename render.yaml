@@ -25,7 +25,7 @@ services:
   - type: web
     name: 2cheries-frontend
     runtime: static
-    plan: free
+    # Le plan 'free' n'existe pas pour le type web/runtime:static (toujours gratuit)
     buildCommand: cd frontend && npm install && npm run build
     staticPublishPath: frontend/build
     envVars:
