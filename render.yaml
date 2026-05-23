@@ -19,7 +19,7 @@ services:
         fromService:
           type: web
           name: 2cheries-frontend
-          property: url
+          envVarKey: RENDER_EXTERNAL_URL
 
   # ─── Frontend Service ───────────────────────────────────
   - type: web
@@ -33,7 +33,7 @@ services:
         fromService:
           type: web
           name: 2cheries-backend
-          property: url
+          envVarKey: RENDER_EXTERNAL_URL
     routes:
       - type: rewrite
         source: /*
@@ -42,5 +42,5 @@ services:
 databases:
   - name: 2cheries-db
     plan: free
-    databaseName: 2cheries_db
-    user: postgres
+    databaseName: db_2cheries
+    user: user_2cheries
