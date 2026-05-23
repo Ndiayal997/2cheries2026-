@@ -102,7 +102,7 @@ router.post('/admin/login', [
   body('username').notEmpty(),
   body('password').notEmpty(),
 ], async (req, res) => {
-  const { username, password } = req.body;
+  const { username, password } = req.body; console.log('DEBUG LOGIN - Received:', username, 'Expected:', process.env.ADMIN_USERNAME, 'Match:', username === process.env.ADMIN_USERNAME);
 
   if (
     username !== process.env.ADMIN_USERNAME ||
