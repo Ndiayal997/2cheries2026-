@@ -1,7 +1,8 @@
 services:
+  # ─── Backend Service ────────────────────────────────────
   - type: web
     name: 2cheries-backend
-    env: node
+    runtime: node
     plan: free
     buildCommand: cd backend && npm install
     startCommand: cd backend && npm start
@@ -16,12 +17,14 @@ services:
         generateValue: true
       - key: FRONTEND_URL
         fromService:
-          type: static
+          type: web
           name: 2cheries-frontend
           property: url
 
-  - type: static
+  # ─── Frontend Service ───────────────────────────────────
+  - type: web
     name: 2cheries-frontend
+    runtime: static
     plan: free
     buildCommand: cd frontend && npm install && npm run build
     staticPublishPath: frontend/build
