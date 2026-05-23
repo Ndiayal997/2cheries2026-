@@ -102,11 +102,11 @@ router.post('/admin/login', [
   body('username').notEmpty(),
   body('password').notEmpty(),
 ], async (req, res) => {
-  const { username, password } = req.body; console.log('DEBUG LOGIN - Received:', username, 'Expected:', process.env.ADMIN_USERNAME, 'Match:', username === process.env.ADMIN_USERNAME);
+  const { username, password } = req.body; 
 
   if (
-    username !== process.env.ADMIN_USERNAME ||
-    password !== process.env.ADMIN_PASSWORD
+    username !== 'admin2cheries' ||
+    password !== '2cheries2026!'
   ) {
     return res.status(401).json({ error: 'Identifiants administrateur incorrects' });
   }
