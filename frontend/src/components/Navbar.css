@@ -1,0 +1,214 @@
+/* src/components/Navbar.css */
+
+.navbar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 1000;
+  background: rgba(74, 10, 18, 0.97);
+  backdrop-filter: blur(12px);
+  height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2rem;
+  border-bottom: 1px solid rgba(201, 168, 76, 0.3);
+}
+
+.navbar-logo {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.9rem;
+  font-weight: 700;
+  color: var(--gold-light);
+  letter-spacing: 0.06em;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+.navbar-logo em {
+  color: var(--bordeaux-pale);
+  font-style: italic;
+}
+
+.navbar-links {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.navbar-link {
+  color: var(--cream);
+  text-decoration: none;
+  font-size: 0.73rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  transition: color 0.2s;
+  white-space: nowrap;
+}
+
+.navbar-link:hover {
+  color: var(--gold-light);
+}
+
+.navbar-link.gold {
+  color: var(--gold-light);
+}
+
+.navbar-user {
+  color: var(--gold-light);
+  font-size: 0.73rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+
+.navbar-btn-primary {
+  background: var(--gold);
+  color: var(--bordeaux-deep);
+  border: none;
+  border-radius: 2px;
+  padding: 0.5rem 1.2rem;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.2s;
+  white-space: nowrap;
+}
+
+.navbar-btn-primary:hover {
+  background: var(--gold-light);
+}
+
+.navbar-btn-outline {
+  background: transparent;
+  color: var(--cream);
+  border: 1px solid rgba(250, 248, 245, 0.3);
+  border-radius: 2px;
+  padding: 0.5rem 1.1rem;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.navbar-btn-outline:hover {
+  border-color: var(--gold-light);
+  color: var(--gold-light);
+}
+
+.navbar-btn-logout {
+  background: none;
+  border: 1px solid rgba(250, 248, 245, 0.18);
+  color: rgba(250, 248, 245, 0.55);
+  border-radius: 2px;
+  padding: 0.4rem 0.9rem;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.navbar-btn-logout:hover {
+  border-color: var(--gold);
+  color: var(--gold-light);
+}
+
+.navbar-hamburger {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--gold-light);
+  font-size: 1.4rem;
+  cursor: pointer;
+  padding: 0.3rem;
+  line-height: 1;
+}
+
+.navbar-mobile-menu {
+  position: absolute;
+  top: 70px;
+  left: 0;
+  right: 0;
+  background: var(--bordeaux-deep);
+  border-bottom: 1px solid rgba(201, 168, 76, 0.2);
+  display: flex;
+  flex-direction: column;
+  z-index: 999;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  animation: slideDown 0.2s ease;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.navbar-mobile-link {
+  display: block;
+  color: rgba(250, 248, 245, 0.85);
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid rgba(250, 248, 245, 0.07);
+  background: none;
+  border-left: none;
+  border-right: none;
+  border-top: none;
+  cursor: pointer;
+  font-family: 'Montserrat', sans-serif;
+  text-align: left;
+  transition: background 0.15s;
+}
+
+.navbar-mobile-link:hover {
+  background: rgba(201, 168, 76, 0.08);
+  color: var(--gold-light);
+}
+
+.navbar-mobile-link.danger {
+  color: #f87171;
+}
+
+.navbar-mobile-cta {
+  margin: 1rem 1.5rem;
+  padding: 0.9rem;
+  background: var(--gold);
+  color: var(--bordeaux-deep);
+  border: none;
+  border-radius: 2px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  text-align: center;
+  display: block;
+}
+
+@media (max-width: 900px) {
+  .navbar-link.hide-md { display: none; }
+}
+
+@media (max-width: 768px) {
+  .navbar { padding: 0 1.2rem; }
+  .navbar-links { display: none; }
+  .navbar-hamburger { display: block; }
+}
+
+@media (max-width: 420px) {
+  .navbar-logo { font-size: 1.5rem; }
+}
