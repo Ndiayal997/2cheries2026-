@@ -104,10 +104,9 @@ router.post('/admin/login', [
 ], async (req, res) => {
   const { username, password } = req.body; 
 
-  if (
-    username !== 'admin2cheries' ||
-    password !== '2cheries2026!'
-  ) {
+  const adminUser = process.env.ADMIN_USERNAME || 'admin2cheries';
+  const adminPass = process.env.ADMIN_PASSWORD || '2cheries2026!';
+  if (username !== adminUser || password !== adminPass) {
     return res.status(401).json({ error: 'Identifiants administrateur incorrects' });
   }
 

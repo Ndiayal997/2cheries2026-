@@ -93,8 +93,8 @@ DB_PASSWORD=votre_mot_de_passe
 JWT_SECRET=changez_ce_secret_en_production
 JWT_EXPIRES_IN=7d
 
-ADMIN_USERNAME=admin2cheries
-ADMIN_PASSWORD=2cheries2026!
+ADMIN_USERNAME=admin_2026
+ADMIN_PASSWORD=Dk9$3vR!q7TmP2hZ
 
 FRONTEND_URL=http://localhost:3000
 ```
@@ -173,8 +173,8 @@ L'interface est disponible sur **http://localhost:3000**
 ### Identifiants admin par défaut
 
 ```
-Identifiant : admin2cheries
-Mot de passe : 2cheries2026!
+Identifiant : admin_2026
+Mot de passe : Dk9$3vR!q7TmP2hZ
 ```
 
 > ⚠️ Changez ces identifiants dans le `.env` avant mise en production.

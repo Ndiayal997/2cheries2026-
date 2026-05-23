@@ -43,8 +43,8 @@ services:
       DB_PASSWORD:      ${DB_PASSWORD:-motdepassefort}
       JWT_SECRET:       ${JWT_SECRET:-changez_ce_secret}
       JWT_EXPIRES_IN:   7d
-      ADMIN_USERNAME:   ${ADMIN_USERNAME:-admin2cheries}
-      ADMIN_PASSWORD:   ${ADMIN_PASSWORD:-2cheries2026!}
+      ADMIN_USERNAME:   ${ADMIN_USERNAME:-admin_2026}
+      ADMIN_PASSWORD:   ${ADMIN_PASSWORD:-Dk9$3vR!q7TmP2hZ}
       FRONTEND_URL:     ${FRONTEND_URL:-http://localhost}
     ports:
       - "5000:5000"
