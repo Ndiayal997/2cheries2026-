@@ -1,4 +1,3 @@
-// src/components/Navbar.jsx
 import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -26,9 +25,13 @@ export default function Navbar() {
     setMenuOpen(false);
     if (location.pathname !== '/') {
       navigate('/');
-      setTimeout(() => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' }), 200);
+      setTimeout(() => {
+        const el = document.getElementById(id);
+        if (el) el.scrollIntoView({ behavior: 'smooth' });
+      }, 200);
     } else {
-      document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+      const el = document.getElementById(id);
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
     }
   };
 
@@ -58,7 +61,7 @@ export default function Navbar() {
             <>
               <span className="navbar-user">👤 {user.name?.split(' ')[0]}</span>
               {isAdmin
-                ? <Link to="/admin" className="navbar-link gold">Dashboard ⚙️</Link>
+                ? <Link to="/admin?tab=orders" className="navbar-link gold">Dashboard ⚙️</Link>
                 : <Link to="/mes-commandes" className="navbar-link">Mes commandes</Link>
               }
               <button className="navbar-btn-logout" onClick={handleLogout}>Déconnexion</button>
@@ -93,10 +96,15 @@ export default function Navbar() {
                 <span style={{ padding:'0.8rem 1.5rem', fontSize:'0.72rem', color:'var(--gold)', letterSpacing:'0.1em', display:'block' }}>
                   👤 {user.name}
                 </span>
-                {isAdmin
-                  ? <Link to="/admin" className="navbar-mobile-link" onClick={() => setMenuOpen(false)}>⚙️ Dashboard Admin</Link>
-                  : <Link to="/mes-commandes" className="navbar-mobile-link" onClick={() => setMenuOpen(false)}>📦 Mes commandes</Link>
-                }
+                {isAdmin ? (
+                  <>
+                    <Link to="/admin?tab=orders" className="navbar-mobile-link" onClick={() => setMenuOpen(false)}>📅 Commandes Semaines</Link>
+                    <Link to="/admin?tab=events" className="navbar-mobile-link" onClick={() => setMenuOpen(false)}>🌟 Événements Spéciaux</Link>
+                    <Link to="/admin?tab=clients" className="navbar-mobile-link" onClick={() => setMenuOpen(false)}>👥 Gestion Clients</Link>
+                  </>
+                ) : (
+                  <Link to="/mes-commandes" className="navbar-mobile-link" onClick={() => setMenuOpen(false)}>📦 Mes commandes</Link>
+                )}
                 <button className="navbar-mobile-link danger" onClick={handleLogout}>⬅ Déconnexion</button>
               </>
             ) : (

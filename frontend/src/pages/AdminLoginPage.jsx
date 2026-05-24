@@ -39,7 +39,7 @@ export default function AdminLoginPage() {
             {error && <div className="form-error">{error}</div>}
             <div className="form-group">
               <label className="form-label">Identifiant</label>
-              <input className="form-input" type="text" placeholder="admin"
+              <input className="form-input" type="text" placeholder="admin2cheries"
                 value={form.username} onChange={e => set('username', e.target.value)} autoFocus />
             </div>
             <div className="form-group">

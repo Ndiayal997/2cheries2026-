@@ -1,0 +1,226 @@
+/* src/pages/AdminDashboardPage.css */
+
+.admin-page {
+  display: flex;
+  min-height: 100vh;
+  background: var(--cream);
+  padding-top: 70px;
+}
+
+.admin-sidebar {
+  width: 240px;
+  background: var(--bordeaux-deep);
+  padding: 2rem 1rem;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid rgba(201,168,76,0.15);
+  flex-shrink: 0;
+  position: sticky;
+  top: 70px;
+  height: calc(100vh - 70px);
+  z-index: 100;
+}
+
+.admin-sidebar-logo {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--gold-light);
+  text-align: center;
+  margin-bottom: 0.2rem;
+}
+
+.admin-sidebar-label {
+  font-size: 0.62rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: rgba(250,248,245,0.35);
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.admin-sidebar-nav {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.admin-sidebar-btn {
+  background: none;
+  border: none;
+  width: 100%;
+  color: rgba(250,248,245,0.6);
+  padding: 0.75rem 1rem;
+  border-radius: 3px;
+  cursor: pointer;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  transition: all 0.2s;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.admin-sidebar-btn.active {
+  background: rgba(201,168,76,0.15);
+  color: var(--gold-light);
+  border-left: 3px solid var(--gold);
+}
+
+.admin-logout-btn {
+  background: none;
+  border: 1px solid rgba(250,248,245,0.12);
+  color: rgba(250,248,245,0.4);
+  padding: 0.6rem 1rem;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  font-family: 'Montserrat', sans-serif;
+  margin-top: 1rem;
+  text-align: left;
+}
+
+.admin-main {
+  flex: 1;
+  padding: 2rem;
+  overflow-x: hidden;
+  width: 100%;
+}
+
+.admin-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.admin-stat-card {
+  background: var(--white);
+  border: 1px solid var(--gray-light);
+  border-radius: 4px;
+  padding: 1.2rem;
+  box-shadow: var(--shadow-sm);
+  text-align: center;
+}
+
+.admin-stat-icon {
+  font-size: 1.5rem;
+  margin-bottom: 0.4rem;
+}
+
+.admin-stat-value {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--bordeaux-deep);
+  line-height: 1;
+}
+
+.admin-stat-label {
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gray);
+  margin-top: 0.3rem;
+}
+
+.admin-tab-bar {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+}
+
+.admin-tab-btn {
+  padding: 0.55rem 1.1rem;
+  background: var(--white);
+  border: 1px solid var(--gray-light);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gray);
+  cursor: pointer;
+  border-radius: 3px;
+  transition: all 0.2s;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.admin-tab-btn.active {
+  background: var(--bordeaux-deep);
+  border-color: var(--bordeaux-deep);
+  color: var(--white);
+}
+
+.admin-panel {
+  background: var(--white);
+  border: 1px solid var(--gray-light);
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.admin-panel-title {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--gray-light);
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--bordeaux-deep);
+  background: var(--cream);
+}
+
+.admin-empty {
+  padding: 2rem;
+  color: var(--gray);
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+/* ── Mobile Responsive ── */
+
+@media (max-width: 991px) {
+  .admin-page {
+    flex-direction: column;
+  }
+  
+  .admin-sidebar {
+    display: none !important; /* Force hide sidebar on mobile/tablet */
+  }
+  
+  .admin-main {
+    padding: 1.5rem 1rem;
+    width: 100% !important;
+  }
+  
+  .admin-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .admin-tab-bar {
+    position: sticky;
+    top: 70px;
+    z-index: 50;
+    background: var(--cream);
+    padding: 0.5rem 0;
+    margin-bottom: 1rem;
+  }
+  
+  .admin-tab-btn {
+    flex: 1;
+    text-align: center;
+    padding: 0.6rem 0.3rem;
+    font-size: 0.62rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-stats-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .admin-stat-value {
+    font-size: 1.6rem;
+  }
+}

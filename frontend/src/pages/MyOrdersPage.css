@@ -1,0 +1,101 @@
+/* src/pages/MyOrdersPage.css */
+
+.orders-page {
+  background: var(--cream);
+  min-height: 100vh;
+  padding-top: 70px;
+}
+
+.orders-wrap {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 3rem 1.5rem;
+}
+
+.orders-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--gray-light);
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.orders-empty {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: var(--white);
+  border-radius: 4px;
+  border: 1px solid var(--gray-light);
+}
+
+.order-card {
+  background: var(--white);
+  border: 1px solid var(--gray-light);
+  border-radius: 4px;
+  margin-bottom: 1.2rem;
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.order-card-header {
+  padding: 1rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--gray-light);
+  background: var(--cream);
+}
+
+.order-card-type {
+  font-weight: 600;
+  font-size: 0.88rem;
+  color: var(--bordeaux-deep);
+}
+
+.order-card-body {
+  padding: 1.2rem 1.5rem;
+}
+
+.order-info-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.82rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--gray-light);
+  gap: 1rem;
+}
+
+.order-wave-alert {
+  background: #fefce8;
+  border-top: 1px solid #fef08a;
+  padding: 0.9rem 1.5rem;
+  font-size: 0.8rem;
+  color: #713f12;
+  line-height: 1.6;
+}
+
+.order-confirmed-banner {
+  background: #f0fdf4;
+  border-top: 1px solid #bbf7d0;
+  padding: 0.9rem 1.5rem;
+  font-size: 0.8rem;
+  color: #166534;
+}
+
+.order-admin-note {
+  background: #f0f9ff;
+  border-top: 1px solid #bae6fd;
+  padding: 0.9rem 1.5rem;
+  font-size: 0.8rem;
+  color: #075985;
+}
+
+@media (max-width: 640px) {
+  .orders-wrap { padding: 1.5rem 1rem; }
+  .order-card-header { padding: 0.8rem 1rem; flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+  .order-info-row { flex-direction: column; gap: 0.2rem; }
+  .order-info-row span:first-child { color: var(--gray); font-size: 0.75rem; }
+}

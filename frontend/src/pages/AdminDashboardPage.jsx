@@ -1,10 +1,10 @@
-// src/pages/AdminDashboardPage.jsx
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../utils/api';
 import toast from 'react-hot-toast';
+import './AdminDashboardPage.css';
 
 const STATUS_LABELS = {
   pending_wave: 'Attente Wave',
@@ -23,8 +23,9 @@ export default function AdminDashboardPage() {
   const { logout } = useAuth();
   const navigate = useNavigate();
   const qc = useQueryClient();
-  const [tab, setTab] = useState('orders');
-  const [noteModal, setNoteModal] = useState(null); // {orderId, type, note}
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tab = searchParams.get('tab') || 'orders';
+  const setTab = (t) => setSearchParams({ tab: t });
 
   // ── Queries ────────────────────────────────────────────
   const { data: stats } = useQuery({
@@ -53,7 +54,7 @@ export default function AdminDashboardPage() {
   // ── Mutations ──────────────────────────────────────────
   const updateWeekStatus = useMutation({
     mutationFn: ({ orderId, status, admin_note }) =>
-      api.patch(`/weeks/orders/${orderId}/status`, { status, admin_note }),
+      api.patch('/weeks/orders/' + orderId + '/status', { status, admin_note }),
     onSuccess: () => {
       qc.invalidateQueries(['adminWeekOrders']);
       qc.invalidateQueries(['adminStats']);
@@ -65,7 +66,7 @@ export default function AdminDashboardPage() {
 
   const updateEventStatus = useMutation({
     mutationFn: ({ orderId, status, admin_note }) =>
-      api.patch(`/events/orders/${orderId}/status`, { status, admin_note }),
+      api.patch('/events/orders/' + orderId + '/status', { status, admin_note }),
     onSuccess: () => {
       qc.invalidateQueries(['adminEventOrders']);
       qc.invalidateQueries(['adminStats']);
@@ -76,7 +77,7 @@ export default function AdminDashboardPage() {
   });
 
   const toggleClient = useMutation({
-    mutationFn: (id) => api.patch(`/admin/clients/${id}/toggle`),
+    mutationFn: (id) => api.patch('/admin/clients/' + id + '/toggle'),
     onSuccess: () => { qc.invalidateQueries(['adminClients']); toast.success('Client mis à jour'); },
     onError: (err) => toast.error(err.error || 'Erreur'),
   });
@@ -98,58 +99,58 @@ export default function AdminDashboardPage() {
   };
 
   const tabs = [
-    { id: 'orders', label: `Commandes semaines (${weekOrders.length})` },
-    { id: 'events', label: `Événements (${eventOrders.length})` },
-    { id: 'clients', label: `Clients (${clients.length})` },
+    { id: 'orders', label: 'Commandes (' + weekOrders.length + ')' },
+    { id: 'events', label: 'Événements (' + eventOrders.length + ')' },
+    { id: 'clients', label: 'Clients (' + clients.length + ')' },
   ];
 
   return (
-    <div style={s.page}>
+    <div className="admin-page">
       {/* Sidebar */}
-      <aside style={s.sidebar}>
-        <div style={s.sidebarLogo}>
+      <aside className="admin-sidebar">
+        <div className="admin-sidebar-logo">
           2<em style={{ fontStyle: 'italic', color: 'var(--bordeaux-pale)' }}>C</em>
         </div>
-        <div style={s.sidebarLabel}>Admin</div>
-        <nav style={s.sidebarNav}>
+        <div className="admin-sidebar-label">Admin</div>
+        <nav className="admin-sidebar-nav">
           {tabs.map(t => (
-            <button key={t.id} style={{ ...s.sidebarBtn, ...(tab === t.id ? s.sidebarBtnActive : {}) }}
+            <button key={t.id} className={'admin-sidebar-btn ' + (tab === t.id ? 'active' : '')}
               onClick={() => setTab(t.id)}>
               {t.id === 'orders' ? '📅' : t.id === 'events' ? '🌟' : '👥'}
               <span style={{ marginLeft: '0.6rem', fontSize: '0.75rem' }}>{t.label}</span>
             </button>
           ))}
         </nav>
-        <button style={s.logoutSidebar} onClick={handleLogout}>⬅ Déconnexion</button>
+        <button className="admin-logout-btn" onClick={handleLogout}>⬅ Déconnexion</button>
       </aside>
 
       {/* Main */}
-      <main style={s.main}>
+      <main className="admin-main">
         {/* Stats */}
         {stats && (
-          <div style={s.statsGrid}>
+          <div className="admin-stats-grid">
             {[
               { label: 'Clients inscrits', value: stats.clients, icon: '👥' },
               { label: 'Commandes semaines', value: stats.week_orders.total, icon: '📅' },
               { label: 'Commandes événements', value: stats.event_orders.total, icon: '🌟' },
               { label: 'Confirmées', value: stats.week_orders.confirmed + stats.event_orders.confirmed, icon: '✅' },
               { label: 'En attente Wave', value: stats.week_orders.pending_wave + stats.event_orders.pending_wave, icon: '⏳' },
-              { label: 'CA Confirmé (FCFA)', value: Math.round(stats.revenue.total / 1000) + 'k', icon: '💰' },
+              { label: 'CA (k)', value: Math.round(stats.revenue.total / 1000) + 'k', icon: '💰' },
             ].map(st => (
-              <div key={st.label} style={s.statCard}>
-                <div style={s.statIcon}>{st.icon}</div>
-                <div style={s.statValue}>{st.value}</div>
-                <div style={s.statLabel}>{st.label}</div>
+              <div key={st.label} className="admin-stat-card">
+                <div className="admin-stat-icon">{st.icon}</div>
+                <div className="admin-stat-value">{st.value}</div>
+                <div className="admin-stat-label">{st.label}</div>
               </div>
             ))}
           </div>
         )}
 
         {/* Tab header */}
-        <div style={s.tabBar}>
+        <div className="admin-tab-bar">
           {tabs.map(t => (
             <button key={t.id}
-              style={{ ...s.tabBtn, ...(tab === t.id ? s.tabBtnActive : {}) }}
+              className={'admin-tab-btn ' + (tab === t.id ? 'active' : '')}
               onClick={() => setTab(t.id)}>
               {t.label}
             </button>
@@ -158,11 +159,11 @@ export default function AdminDashboardPage() {
 
         {/* ── Panel: Week orders ── */}
         {tab === 'orders' && (
-          <div style={s.panel}>
-            <div style={s.panelTitle}>Commandes — Semaines régulières</div>
+          <div className="admin-panel">
+            <div className="admin-panel-title">Commandes — Semaines régulières</div>
             {lWeek ? <div style={{ padding: '2rem', textAlign: 'center' }}><div className="spinner" /></div> :
-            weekOrders.length === 0 ? <p style={s.empty}>Aucune commande.</p> :
-            <div style={{ overflowX: 'auto' }}>
+            weekOrders.length === 0 ? <p className="admin-empty">Aucune commande.</p> :
+            <div className="data-table-container">
               <table className="data-table" style={{ minWidth: 780 }}>
                 <thead>
                   <tr>
@@ -170,7 +171,7 @@ export default function AdminDashboardPage() {
                     <th>Semaine</th>
                     <th>Commande</th>
                     <th>Montant</th>
-                    <th>Acompte Wave</th>
+                    <th>Wave</th>
                     <th>Statut</th>
                     <th>Actions</th>
                   </tr>
@@ -180,19 +181,18 @@ export default function AdminDashboardPage() {
                     <tr key={o.id}>
                       <td>
                         <strong>{o.client_name}</strong><br />
-                        <span style={{ fontSize: '0.72rem', color: 'var(--gray)' }}>{o.client_phone}</span><br />
-                        <span style={{ fontSize: '0.68rem', color: 'var(--gray)' }}>{o.client_email}</span>
+                        <span style={{ fontSize: '0.72rem', color: 'var(--gray)' }}>{o.client_phone}</span>
                       </td>
                       <td style={{ fontSize: '0.78rem' }}>{o.week_label}</td>
                       <td style={{ fontSize: '0.78rem', maxWidth: 180 }}>{o.description}</td>
-                      <td style={{ fontSize: '0.82rem', fontWeight: 600, whiteSpace: 'nowrap' }}>
-                        {Number(o.amount).toLocaleString('fr-FR')} FCFA
+                      <td style={{ fontSize: '0.82rem', fontWeight: 600 }}>
+                        {Number(o.amount).toLocaleString('fr-FR')}
                       </td>
-                      <td style={{ fontSize: '0.82rem', color: 'var(--bordeaux)', fontWeight: 600, whiteSpace: 'nowrap' }}>
-                        {Number(o.wave_amount).toLocaleString('fr-FR')} FCFA
+                      <td style={{ fontSize: '0.82rem', color: 'var(--bordeaux)', fontWeight: 600 }}>
+                        {Number(o.wave_amount).toLocaleString('fr-FR')}
                       </td>
                       <td>
-                        <span className={`badge ${STATUS_BADGE[o.status] || 'badge-pending'}`}>
+                        <span className={'badge ' + (STATUS_BADGE[o.status] || 'badge-pending')}>
                           {STATUS_LABELS[o.status] || o.status}
                         </span>
                       </td>
@@ -200,26 +200,15 @@ export default function AdminDashboardPage() {
                         <div style={{ display: 'flex', gap: '0.3rem', flexWrap: 'wrap' }}>
                           {o.status === 'pending_wave' && (
                             <button className="btn-sm" style={{ background: '#dbeafe', color: '#1e40af' }}
-                              onClick={() => markWaveSent('week', o.id)}>
-                              Wave ✓
-                            </button>
+                              onClick={() => markWaveSent('week', o.id)}>✓</button>
                           )}
                           {o.status !== 'confirmed' && o.status !== 'cancelled' && (
-                            <button className="btn-sm btn-confirm" onClick={() => confirmOrder('week', o.id)}>
-                              Confirmer
-                            </button>
+                            <button className="btn-sm btn-confirm" onClick={() => confirmOrder('week', o.id)}>Ok</button>
                           )}
                           {o.status !== 'cancelled' && (
-                            <button className="btn-sm btn-cancel" onClick={() => cancelOrder('week', o.id)}>
-                              ✕
-                            </button>
+                            <button className="btn-sm btn-cancel" onClick={() => cancelOrder('week', o.id)}>✕</button>
                           )}
                         </div>
-                        {o.admin_note && (
-                          <div style={{ fontSize: '0.65rem', color: 'var(--gray)', marginTop: '0.3rem' }}>
-                            📝 {o.admin_note}
-                          </div>
-                        )}
                       </td>
                     </tr>
                   ))}
@@ -231,11 +220,11 @@ export default function AdminDashboardPage() {
 
         {/* ── Panel: Event orders ── */}
         {tab === 'events' && (
-          <div style={s.panel}>
-            <div style={s.panelTitle}>Commandes — Événements spéciaux</div>
+          <div className="admin-panel">
+            <div className="admin-panel-title">Commandes — Événements</div>
             {lEvent ? <div style={{ padding: '2rem', textAlign: 'center' }}><div className="spinner" /></div> :
-            eventOrders.length === 0 ? <p style={s.empty}>Aucune commande événement.</p> :
-            <div style={{ overflowX: 'auto' }}>
+            eventOrders.length === 0 ? <p className="admin-empty">Aucune commande.</p> :
+            <div className="data-table-container">
               <table className="data-table" style={{ minWidth: 760 }}>
                 <thead>
                   <tr>
@@ -243,7 +232,7 @@ export default function AdminDashboardPage() {
                     <th>Événement</th>
                     <th>Tenue</th>
                     <th>Montant</th>
-                    <th>Acompte Wave</th>
+                    <th>Wave</th>
                     <th>Statut</th>
                     <th>Actions</th>
                   </tr>
@@ -260,14 +249,14 @@ export default function AdminDashboardPage() {
                         <span style={{ fontSize: '0.72rem', color: 'var(--gray)' }}>{o.event_date}</span>
                       </td>
                       <td style={{ fontSize: '0.78rem', maxWidth: 180 }}>{o.description}</td>
-                      <td style={{ fontSize: '0.82rem', fontWeight: 600, whiteSpace: 'nowrap' }}>
-                        {Number(o.amount).toLocaleString('fr-FR')} FCFA
+                      <td style={{ fontSize: '0.82rem', fontWeight: 600 }}>
+                        {Number(o.amount).toLocaleString('fr-FR')}
                       </td>
-                      <td style={{ fontSize: '0.82rem', color: 'var(--bordeaux)', fontWeight: 600, whiteSpace: 'nowrap' }}>
-                        {Number(o.wave_amount).toLocaleString('fr-FR')} FCFA
+                      <td style={{ fontSize: '0.82rem', color: 'var(--bordeaux)', fontWeight: 600 }}>
+                        {Number(o.wave_amount).toLocaleString('fr-FR')}
                       </td>
                       <td>
-                        <span className={`badge ${STATUS_BADGE[o.status] || 'badge-pending'}`}>
+                        <span className={'badge ' + (STATUS_BADGE[o.status] || 'badge-pending')}>
                           {STATUS_LABELS[o.status] || o.status}
                         </span>
                       </td>
@@ -275,19 +264,13 @@ export default function AdminDashboardPage() {
                         <div style={{ display: 'flex', gap: '0.3rem', flexWrap: 'wrap' }}>
                           {o.status === 'pending_wave' && (
                             <button className="btn-sm" style={{ background: '#dbeafe', color: '#1e40af' }}
-                              onClick={() => markWaveSent('event', o.id)}>
-                              Wave ✓
-                            </button>
+                              onClick={() => markWaveSent('event', o.id)}>✓</button>
                           )}
                           {o.status !== 'confirmed' && o.status !== 'cancelled' && (
-                            <button className="btn-sm btn-confirm" onClick={() => confirmOrder('event', o.id)}>
-                              Confirmer
-                            </button>
+                            <button className="btn-sm btn-confirm" onClick={() => confirmOrder('event', o.id)}>Ok</button>
                           )}
                           {o.status !== 'cancelled' && (
-                            <button className="btn-sm btn-cancel" onClick={() => cancelOrder('event', o.id)}>
-                              ✕
-                            </button>
+                            <button className="btn-sm btn-cancel" onClick={() => cancelOrder('event', o.id)}>✕</button>
                           )}
                         </div>
                       </td>
@@ -301,11 +284,11 @@ export default function AdminDashboardPage() {
 
         {/* ── Panel: Clients ── */}
         {tab === 'clients' && (
-          <div style={s.panel}>
-            <div style={s.panelTitle}>Clients inscrits</div>
+          <div className="admin-panel">
+            <div className="admin-panel-title">Clients inscrits</div>
             {lClients ? <div style={{ padding: '2rem', textAlign: 'center' }}><div className="spinner" /></div> :
-            clients.length === 0 ? <p style={s.empty}>Aucun client.</p> :
-            <div style={{ overflowX: 'auto' }}>
+            clients.length === 0 ? <p className="admin-empty">Aucun client.</p> :
+            <div className="data-table-container">
               <table className="data-table" style={{ minWidth: 640 }}>
                 <thead>
                   <tr>
@@ -313,8 +296,6 @@ export default function AdminDashboardPage() {
                     <th>Email</th>
                     <th>Téléphone</th>
                     <th>Inscrit le</th>
-                    <th>Cmd semaines</th>
-                    <th>Cmd événements</th>
                     <th>Statut</th>
                     <th>Action</th>
                   </tr>
@@ -328,19 +309,17 @@ export default function AdminDashboardPage() {
                       <td style={{ fontSize: '0.72rem', color: 'var(--gray)' }}>
                         {new Date(c.created_at).toLocaleDateString('fr-FR')}
                       </td>
-                      <td style={{ textAlign: 'center' }}>{c.week_orders}</td>
-                      <td style={{ textAlign: 'center' }}>{c.event_orders}</td>
                       <td>
-                        <span className={`badge ${c.is_active ? 'badge-confirmed' : 'badge-cancelled'}`}>
+                        <span className={'badge ' + (c.is_active ? 'badge-confirmed' : 'badge-cancelled')}>
                           {c.is_active ? 'Actif' : 'Désactivé'}
                         </span>
                       </td>
                       <td>
                         <button
-                          className={`btn-sm ${c.is_active ? 'btn-cancel' : 'btn-confirm'}`}
+                          className={'btn-sm ' + (c.is_active ? 'btn-cancel' : 'btn-confirm')}
                           onClick={() => toggleClient.mutate(c.id)}
                         >
-                          {c.is_active ? 'Désactiver' : 'Activer'}
+                          {c.is_active ? 'Off' : 'On'}
                         </button>
                       </td>
                     </tr>
@@ -354,94 +333,3 @@ export default function AdminDashboardPage() {
     </div>
   );
 }
-
-const s = {
-  page: {
-    display: 'flex', minHeight: '100vh',
-    background: 'var(--cream)', paddingTop: 70,
-  },
-  sidebar: {
-    width: 240, minHeight: 'calc(100vh - 70px)',
-    background: 'var(--bordeaux-deep)',
-    padding: '2rem 1rem',
-    display: 'flex', flexDirection: 'column',
-    borderRight: '1px solid rgba(201,168,76,0.15)',
-    flexShrink: 0,
-    position: 'sticky', top: 70, height: 'calc(100vh - 70px)',
-  },
-  sidebarLogo: {
-    fontFamily: "'Cormorant Garamond', serif",
-    fontSize: '2rem', fontWeight: 700,
-    color: 'var(--gold-light)', textAlign: 'center', marginBottom: '0.2rem',
-  },
-  sidebarLabel: {
-    fontSize: '0.62rem', letterSpacing: '0.3em', textTransform: 'uppercase',
-    color: 'rgba(250,248,245,0.35)', textAlign: 'center', marginBottom: '2rem',
-  },
-  sidebarNav: { flex: 1, display: 'flex', flexDirection: 'column', gap: '0.4rem' },
-  sidebarBtn: {
-    background: 'none', border: 'none', width: '100%',
-    color: 'rgba(250,248,245,0.6)', padding: '0.75rem 1rem',
-    borderRadius: '3px', cursor: 'pointer', textAlign: 'left',
-    display: 'flex', alignItems: 'center', transition: 'all 0.2s',
-    fontFamily: 'Montserrat, sans-serif',
-  },
-  sidebarBtnActive: {
-    background: 'rgba(201,168,76,0.15)',
-    color: 'var(--gold-light)',
-    borderLeft: '3px solid var(--gold)',
-  },
-  logoutSidebar: {
-    background: 'none', border: '1px solid rgba(250,248,245,0.12)',
-    color: 'rgba(250,248,245,0.4)', padding: '0.6rem 1rem',
-    borderRadius: '3px', cursor: 'pointer', fontSize: '0.72rem',
-    letterSpacing: '0.08em', fontFamily: 'Montserrat, sans-serif',
-    marginTop: '1rem', textAlign: 'left',
-  },
-  main: { flex: 1, padding: '2rem', overflowX: 'hidden' },
-  statsGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))',
-    gap: '1rem', marginBottom: '2rem',
-  },
-  statCard: {
-    background: 'var(--white)', border: '1px solid var(--gray-light)',
-    borderRadius: '4px', padding: '1.2rem',
-    boxShadow: 'var(--shadow-sm)', textAlign: 'center',
-  },
-  statIcon: { fontSize: '1.5rem', marginBottom: '0.4rem' },
-  statValue: {
-    fontFamily: "'Cormorant Garamond', serif",
-    fontSize: '2rem', fontWeight: 600, color: 'var(--bordeaux-deep)', lineHeight: 1,
-  },
-  statLabel: {
-    fontSize: '0.65rem', letterSpacing: '0.1em', textTransform: 'uppercase',
-    color: 'var(--gray)', marginTop: '0.3rem',
-  },
-  tabBar: {
-    display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1.5rem',
-  },
-  tabBtn: {
-    padding: '0.55rem 1.1rem',
-    background: 'var(--white)', border: '1px solid var(--gray-light)',
-    fontSize: '0.72rem', fontWeight: 600, letterSpacing: '0.08em',
-    textTransform: 'uppercase', color: 'var(--gray)',
-    cursor: 'pointer', borderRadius: '3px', transition: 'all 0.2s',
-    fontFamily: 'Montserrat, sans-serif',
-  },
-  tabBtnActive: {
-    background: 'var(--bordeaux-deep)', borderColor: 'var(--bordeaux-deep)', color: 'var(--white)',
-  },
-  panel: {
-    background: 'var(--white)', border: '1px solid var(--gray-light)',
-    borderRadius: '4px', overflow: 'hidden', boxShadow: 'var(--shadow-sm)',
-  },
-  panelTitle: {
-    padding: '1rem 1.5rem',
-    borderBottom: '1px solid var(--gray-light)',
-    fontFamily: "'Cormorant Garamond', serif",
-    fontSize: '1.2rem', fontWeight: 600, color: 'var(--bordeaux-deep)',
-    background: 'var(--cream)',
-  },
-  empty: { padding: '2rem', color: 'var(--gray)', fontSize: '0.85rem', textAlign: 'center' },
-};
