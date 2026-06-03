@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../utils/api';
+import ManualOrderModal from '../components/ManualOrderModal';
 import toast from 'react-hot-toast';
 import './AdminDashboardPage.css';
 
@@ -26,6 +27,7 @@ export default function AdminDashboardPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const tab = searchParams.get('tab') || 'orders';
   const setTab = (t) => setSearchParams({ tab: t });
+  const [showManual, setShowManual] = useState(false);
 
   // ── Queries ────────────────────────────────────────────
   const { data: stats } = useQuery({
@@ -55,6 +57,11 @@ export default function AdminDashboardPage() {
   const { data: clients = [], isLoading: lClients } = useQuery({
     queryKey: ['adminClients'],
     queryFn: () => api.get('/admin/clients').then(r => r.data),
+  });
+
+  const { data: events = [] } = useQuery({
+    queryKey: ['events'],
+    queryFn: () => api.get('/events').then(r => r.data),
   });
 
   // ── Mutations ──────────────────────────────────────────
@@ -128,6 +135,26 @@ export default function AdminDashboardPage() {
     { id: 'clients', label: 'Clients (' + clients.length + ')' },
   ];
 
+  const renderPhotoCell = (images) => {
+    const imgs = images ? (typeof images === 'string' ? JSON.parse(images) : images) : [];
+    if (imgs.length === 0) return '—';
+    const baseUrl = api.defaults.baseURL.replace('/api', '');
+    return (
+      <div style={{ display: 'flex', gap: '4px' }}>
+        {imgs.slice(0, 2).map((img, idx) => (
+          <img 
+            key={idx} 
+            src={baseUrl + img} 
+            alt="art" 
+            style={{ width: 40, height: 40, borderRadius: 4, objectFit: 'cover', cursor: 'pointer' }}
+            onClick={() => window.open(baseUrl + img, '_blank')}
+          />
+        ))}
+        {imgs.length > 2 && <span style={{ fontSize: '0.6rem', alignSelf: 'flex-end' }}>+{imgs.length - 2}</span>}
+      </div>
+    );
+  };
+
   return (
     <div className="admin-page">
       {/* Sidebar */}
@@ -171,14 +198,19 @@ export default function AdminDashboardPage() {
         )}
 
         {/* Tab header */}
-        <div className="admin-tab-bar">
-          {tabs.map(t => (
-            <button key={t.id}
-              className={'admin-tab-btn ' + (tab === t.id ? 'active' : '')}
-              onClick={() => setTab(t.id)}>
-              {t.label}
-            </button>
-          ))}
+        <div className="admin-tab-bar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+            {tabs.map(t => (
+              <button key={t.id}
+                className={'admin-tab-btn ' + (tab === t.id ? 'active' : '')}
+                onClick={() => setTab(t.id)}>
+                {t.label}
+              </button>
+            ))}
+          </div>
+          <button className="btn-gold" style={{ fontSize: '0.75rem', padding: '0.5rem 1rem' }} onClick={() => setShowManual(true)}>
+            + Ajouter commande
+          </button>
         </div>
 
         {/* ── Panel: Week orders ── */}
@@ -188,12 +220,13 @@ export default function AdminDashboardPage() {
             {lWeek ? <div style={{ padding: '2rem', textAlign: 'center' }}><div className="spinner" /></div> :
             weekOrders.length === 0 ? <p className="admin-empty">Aucune commande.</p> :
             <div className="data-table-container">
-              <table className="data-table" style={{ minWidth: 780 }}>
+              <table className="data-table" style={{ minWidth: 850 }}>
                 <thead>
                   <tr>
                     <th>Client</th>
                     <th>Semaine</th>
                     <th>Commande</th>
+                    <th>Photo</th>
                     <th>Montant</th>
                     <th>Wave</th>
                     <th>Statut</th>
@@ -204,11 +237,12 @@ export default function AdminDashboardPage() {
                   {weekOrders.map(o => (
                     <tr key={o.id}>
                       <td>
-                        <strong>{o.client_name}</strong><br />
+                        <strong>{o.client_name}</strong> <span style={{ fontSize: '0.65rem', color: 'var(--gold-dark)' }}>{o.order_date && new Date(o.order_date).toLocaleDateString('fr-FR')}</span><br />
                         <span style={{ fontSize: '0.72rem', color: 'var(--gray)' }}>{o.client_phone}</span>
                       </td>
                       <td style={{ fontSize: '0.78rem' }}>{o.week_label}</td>
-                      <td style={{ fontSize: '0.78rem', maxWidth: 180 }}>{o.description}</td>
+                      <td style={{ fontSize: '0.78rem', maxWidth: 150 }}>{o.description}</td>
+                      <td>{renderPhotoCell(o.images)}</td>
                       <td style={{ fontSize: '0.82rem', fontWeight: 600 }}>
                         {Number(o.amount).toLocaleString('fr-FR')}
                       </td>
@@ -288,12 +322,13 @@ export default function AdminDashboardPage() {
             {lEvent ? <div style={{ padding: '2rem', textAlign: 'center' }}><div className="spinner" /></div> :
             eventOrders.length === 0 ? <p className="admin-empty">Aucune commande.</p> :
             <div className="data-table-container">
-              <table className="data-table" style={{ minWidth: 760 }}>
+              <table className="data-table" style={{ minWidth: 850 }}>
                 <thead>
                   <tr>
                     <th>Client</th>
                     <th>Événement</th>
                     <th>Tenue</th>
+                    <th>Photo</th>
                     <th>Montant</th>
                     <th>Wave</th>
                     <th>Statut</th>
@@ -304,14 +339,15 @@ export default function AdminDashboardPage() {
                   {eventOrders.map(o => (
                     <tr key={o.id}>
                       <td>
-                        <strong>{o.client_name}</strong><br />
+                        <strong>{o.client_name}</strong> <span style={{ fontSize: '0.65rem', color: 'var(--gold-dark)' }}>{o.order_date && new Date(o.order_date).toLocaleDateString('fr-FR')}</span><br />
                         <span style={{ fontSize: '0.72rem', color: 'var(--gray)' }}>{o.client_phone}</span>
                       </td>
                       <td>
                         <strong style={{ fontSize: '0.82rem' }}>{o.event_name}</strong><br />
                         <span style={{ fontSize: '0.72rem', color: 'var(--gray)' }}>{o.event_date}</span>
                       </td>
-                      <td style={{ fontSize: '0.78rem', maxWidth: 180 }}>{o.description}</td>
+                      <td style={{ fontSize: '0.78rem', maxWidth: 120 }}>{o.description}</td>
+                      <td>{renderPhotoCell(o.images)}</td>
                       <td style={{ fontSize: '0.82rem', fontWeight: 600 }}>
                         {Number(o.amount).toLocaleString('fr-FR')}
                       </td>
@@ -393,6 +429,17 @@ export default function AdminDashboardPage() {
           </div>
         )}
       </main>
+      <ManualOrderModal 
+        open={showManual} 
+        onClose={() => setShowManual(false)} 
+        weeks={weeks} 
+        events={events} 
+        onSuccess={() => { 
+          qc.invalidateQueries({ queryKey: ['adminWeekOrders'] }); 
+          qc.invalidateQueries({ queryKey: ['adminEventOrders'] }); 
+          qc.invalidateQueries({ queryKey: ['adminStats'] }); 
+        }} 
+      />
     </div>
   );
 }

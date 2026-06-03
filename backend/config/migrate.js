@@ -4,7 +4,7 @@ const pool = require('./database');
 const migrate = async () => {
   const client = await pool.connect();
   try {
-    console.log('🔄 Migration en cours...'); console.log('Connecting...');
+    console.log('🔄 Migration en cours...');
 
     await client.query(`
       -- Extension UUID
@@ -58,6 +58,8 @@ const migrate = async () => {
         status        VARCHAR(30) DEFAULT 'pending_wave'
                       CHECK (status IN ('pending_wave','wave_sent','confirmed','cancelled')),
         admin_note    TEXT,
+        images        JSONB DEFAULT '[]',
+        order_date    DATE DEFAULT CURRENT_DATE,
         created_at    TIMESTAMPTZ DEFAULT NOW(),
         updated_at    TIMESTAMPTZ DEFAULT NOW()
       );
@@ -73,9 +75,17 @@ const migrate = async () => {
         status        VARCHAR(30) DEFAULT 'pending_wave'
                       CHECK (status IN ('pending_wave','wave_sent','confirmed','cancelled')),
         admin_note    TEXT,
+        images        JSONB DEFAULT '[]',
+        order_date    DATE DEFAULT CURRENT_DATE,
         created_at    TIMESTAMPTZ DEFAULT NOW(),
         updated_at    TIMESTAMPTZ DEFAULT NOW()
       );
+
+      -- Mise à jour des tables existantes
+      ALTER TABLE orders ADD COLUMN IF NOT EXISTS images JSONB DEFAULT '[]';
+      ALTER TABLE orders ADD COLUMN IF NOT EXISTS order_date DATE DEFAULT CURRENT_DATE;
+      ALTER TABLE event_orders ADD COLUMN IF NOT EXISTS images JSONB DEFAULT '[]';
+      ALTER TABLE event_orders ADD COLUMN IF NOT EXISTS order_date DATE DEFAULT CURRENT_DATE;
 
       -- ─── INDEX ────────────────────────────────────────────
       CREATE INDEX IF NOT EXISTS idx_orders_client_id   ON orders(client_id);
@@ -86,12 +96,12 @@ const migrate = async () => {
 
       -- ─── TRIGGER updated_at ───────────────────────────────
       CREATE OR REPLACE FUNCTION update_updated_at()
-      RETURNS TRIGGER AS $$
+      RETURNS TRIGGER AS 79086
       BEGIN
         NEW.updated_at = NOW();
         RETURN NEW;
       END;
-      $$ LANGUAGE plpgsql;
+      79086 LANGUAGE plpgsql;
 
       DROP TRIGGER IF EXISTS trg_clients_updated ON clients;
       CREATE TRIGGER trg_clients_updated
@@ -109,14 +119,17 @@ const migrate = async () => {
         FOR EACH ROW EXECUTE FUNCTION update_updated_at();
     `);
 
-    console.log('✅ Tables créées avec succès');
+    console.log('✅ Migration terminée');
   } catch (err) {
     console.error('❌ Erreur migration:', err.message);
     throw err;
   } finally {
     client.release();
-    await pool.end();
   }
 };
 
-migrate().catch(() => process.exit(1));
+if (require.main === module) {
+  migrate().then(() => pool.end()).catch(() => process.exit(1));
+}
+
+module.exports = migrate;

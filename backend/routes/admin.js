@@ -3,6 +3,77 @@ const express = require('express');
 const router = express.Router();
 const pool = require('../config/database');
 const { requireAdmin } = require('../middleware/auth');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+const bcrypt = require('bcryptjs');
+
+// ─── MULTER CONFIG ───────────────────────────────────────
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const dir = 'uploads/';
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir);
+    cb(null, dir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, 'order-' + uniqueSuffix + path.extname(file.originalname));
+  }
+});
+const upload = multer({ storage });
+
+// ─── POST /api/admin/orders/manual ──────────────────────
+router.post('/orders/manual', requireAdmin, upload.array('photos', 5), async (req, res) => {
+  const { client_name, client_phone, description, amount, week_id, event_id, order_date } = req.body;
+  const files = req.files || [];
+  const imageUrls = files.map(f => '/uploads/' + f.filename);
+
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+
+    // 1. Trouver ou créer le client
+    let clientId;
+    const clientRes = await client.query('SELECT id FROM clients WHERE phone = ', [client_phone]);
+    
+    if (clientRes.rows.length) {
+      clientId = clientRes.rows[0].id;
+    } else {
+      // Créer un client par défaut (mot de passe aléatoire car créé par admin)
+      const dummyPass = await bcrypt.hash(Math.random().toString(36), 10);
+      const newClientRes = await client.query(
+        'INSERT INTO clients (name, phone, password_hash) VALUES (, , ) RETURNING id',
+        [client_name, client_phone, dummyPass]
+      );
+      clientId = newClientRes.rows[0].id;
+    }
+
+    // 2. Créer la commande
+    let query, params;
+    const wave_amount = Math.ceil((amount || 0) / 2);
+
+    if (event_id) {
+      query = `INSERT INTO event_orders (client_id, event_id, description, amount, wave_amount, status, images, order_date)
+               VALUES ($1, $2, $3, $4, $5, 'confirmed', $6, $7) RETURNING *`;
+      params = [clientId, event_id, description, amount, wave_amount, JSON.stringify(imageUrls), order_date || new Date()];
+    } else {
+      query = `INSERT INTO orders (client_id, week_id, description, amount, wave_amount, status, images, order_date)
+               VALUES ($1, $2, $3, $4, $5, 'confirmed', $6, $7) RETURNING *`;
+      params = [clientId, week_id, description, amount, wave_amount, JSON.stringify(imageUrls), order_date || new Date()];
+    }
+
+    const { rows } = await client.query(query, params);
+    await client.query('COMMIT');
+
+    res.status(201).json({ message: 'Commande manuelle créée', order: rows[0] });
+  } catch (err) {
+    await client.query('ROLLBACK');
+    console.error(err);
+    res.status(500).json({ error: 'Erreur lors de la création de la commande' });
+  } finally {
+    client.release();
+  }
+});
 
 // ─── GET /api/admin/stats ─────────────────────────────────
 router.get('/stats', requireAdmin, async (req, res) => {
