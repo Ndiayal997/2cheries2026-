@@ -14,8 +14,8 @@ const migrate = async () => {
       CREATE TABLE IF NOT EXISTS clients (
         id            UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
         name          VARCHAR(150) NOT NULL,
-        email         VARCHAR(255) UNIQUE NOT NULL,
-        phone         VARCHAR(30) NOT NULL,
+        email         VARCHAR(255) UNIQUE,
+        phone         VARCHAR(30) UNIQUE NOT NULL,
         password_hash VARCHAR(255) NOT NULL,
         is_active     BOOLEAN DEFAULT true,
         created_at    TIMESTAMPTZ DEFAULT NOW(),

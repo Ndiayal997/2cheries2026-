@@ -8,7 +8,7 @@ import toast from 'react-hot-toast';
 export default function LoginModal({ open, onClose, onSwitchToRegister }) {
   const { login } = useAuth();
   const navigate = useNavigate();
-  const [form, setForm] = useState({ email: '', password: '' });
+  const [form, setForm] = useState({ identifier: '', password: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -17,15 +17,15 @@ export default function LoginModal({ open, onClose, onSwitchToRegister }) {
   const handleSubmit = async (e) => {
     e?.preventDefault();
     setError('');
-    if (!form.email || !form.password) { setError('Remplissez tous les champs.'); return; }
+    if (!form.identifier || !form.password) { setError('Remplissez tous les champs.'); return; }
     setLoading(true);
     try {
-      const user = await login(form.email, form.password);
+      const user = await login(form.identifier, form.password);
       toast.success(`Bienvenue, ${user.name.split(' ')[0]} !`);
       onClose();
       if (user.role === 'admin') navigate('/admin');
     } catch (err) {
-      setError(err.error || 'Email ou mot de passe incorrect');
+      setError(err.error || 'Identifiant ou mot de passe incorrect');
     } finally {
       setLoading(false);
     }
@@ -37,13 +37,13 @@ export default function LoginModal({ open, onClose, onSwitchToRegister }) {
         {error && <div className="form-error">{error}</div>}
 
         <div className="form-group">
-          <label className="form-label">Email</label>
+          <label className="form-label">Téléphone ou Email</label>
           <input
             className="form-input"
-            type="email"
-            placeholder="votre@email.com"
-            value={form.email}
-            onChange={e => set('email', e.target.value)}
+            type="text"
+            placeholder="77 XXX XX XX"
+            value={form.identifier}
+            onChange={e => set('identifier', e.target.value)}
             autoFocus
           />
         </div>

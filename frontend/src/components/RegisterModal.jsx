@@ -6,7 +6,7 @@ import toast from 'react-hot-toast';
 
 export default function RegisterModal({ open, onClose, onSwitchToLogin }) {
   const { register } = useAuth();
-  const [form, setForm] = useState({ name: '', email: '', phone: '', password: '' });
+  const [form, setForm] = useState({ name: '', phone: '', password: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -15,13 +15,13 @@ export default function RegisterModal({ open, onClose, onSwitchToLogin }) {
   const handleSubmit = async (e) => {
     e?.preventDefault();
     setError('');
-    if (!form.name || !form.email || !form.phone || !form.password) {
+    if (!form.name || !form.phone || !form.password) {
       setError('Tous les champs sont obligatoires.'); return;
     }
     if (form.password.length < 6) { setError('Mot de passe : 6 caractères minimum.'); return; }
     setLoading(true);
     try {
-      const user = await register(form.name, form.email, form.phone, form.password);
+      const user = await register(form.name, null, form.phone, form.password);
       toast.success(`Bienvenue, ${user.name.split(' ')[0]} ! Compte créé.`);
       onClose();
     } catch (err) {
@@ -37,15 +37,9 @@ export default function RegisterModal({ open, onClose, onSwitchToLogin }) {
         {error && <div className="form-error">{error}</div>}
 
         <div className="form-group">
-          <label className="form-label">Nom complet</label>
-          <input className="form-input" type="text" placeholder="Prénom Nom"
+          <label className="form-label">Prénom</label>
+          <input className="form-input" type="text" placeholder="Votre prénom"
             value={form.name} onChange={e => set('name', e.target.value)} autoFocus />
-        </div>
-
-        <div className="form-group">
-          <label className="form-label">Email</label>
-          <input className="form-input" type="email" placeholder="votre@email.com"
-            value={form.email} onChange={e => set('email', e.target.value)} />
         </div>
 
         <div className="form-group">

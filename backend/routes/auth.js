@@ -10,7 +10,7 @@ const { requireAuth } = require('../middleware/auth');
 // ─── POST /api/auth/register ──────────────────────────────
 router.post('/register', [
   body('name').trim().notEmpty().withMessage('Le nom est requis'),
-  body('email').isEmail().normalizeEmail().withMessage('Email invalide'),
+  body('email').optional({ checkFalsy: true }).isEmail().normalizeEmail().withMessage('Email invalide'),
   body('phone').trim().notEmpty().withMessage('Le téléphone est requis'),
   body('password').isLength({ min: 6 }).withMessage('Mot de passe: 6 caractères minimum'),
 ], async (req, res) => {
@@ -23,9 +23,9 @@ router.post('/register', [
 
   try {
     // Vérifier si l'email existe déjà
-    const existing = await pool.query('SELECT id FROM clients WHERE email = $1', [email]);
+    const existing = await pool.query('SELECT id FROM clients WHERE phone = $1', [phone]);
     if (existing.rows.length) {
-      return res.status(409).json({ error: 'Cet email est déjà utilisé' });
+      return res.status(409).json({ error: 'Ce numéro de téléphone est déjà utilisé' });
     }
 
     const password_hash = await bcrypt.hash(password, 12);
@@ -56,29 +56,29 @@ router.post('/register', [
 
 // ─── POST /api/auth/login ─────────────────────────────────
 router.post('/login', [
-  body('email').isEmail().normalizeEmail(),
+  body('email').notEmpty(),
   body('password').notEmpty(),
 ], async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    return res.status(400).json({ error: 'Email ou mot de passe invalide' });
+    return res.status(400).json({ error: 'Identifiant ou mot de passe invalide' });
   }
 
   const { email, password } = req.body;
 
   try {
     const { rows } = await pool.query(
-      'SELECT * FROM clients WHERE email = $1 AND is_active = true',
+      'SELECT * FROM clients WHERE (email = $1 OR phone = $1) AND is_active = true',
       [email]
     );
     if (!rows.length) {
-      return res.status(401).json({ error: 'Email ou mot de passe incorrect' });
+      return res.status(401).json({ error: 'Identifiant ou mot de passe incorrect' });
     }
 
     const client = rows[0];
     const match = await bcrypt.compare(password, client.password_hash);
     if (!match) {
-      return res.status(401).json({ error: 'Email ou mot de passe incorrect' });
+      return res.status(401).json({ error: 'Identifiant ou mot de passe incorrect' });
     }
 
     const token = jwt.sign(
