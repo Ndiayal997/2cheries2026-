@@ -140,7 +140,7 @@ export default function AdminDashboardPage() {
           {tabs.map(t => (
             <button key={t.id} className={'admin-sidebar-btn ' + (tab === t.id ? 'active' : '')}
               onClick={() => setTab(t.id)}>
-              {t.id === 'orders' ? '📅' : t.id === 'weeks' ? '▣' : t.id === 'events' ? '🌟' : '👥'}
+              {t.id === 'orders' ? '📅' : t.id === 'weeks' ? '🗓️' : t.id === 'events' ? '🌟' : '👥'}
               <span style={{ marginLeft: '0.6rem', fontSize: '0.75rem' }}>{t.label}</span>
             </button>
           ))}
