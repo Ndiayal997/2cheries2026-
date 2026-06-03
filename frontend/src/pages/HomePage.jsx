@@ -31,7 +31,8 @@ export default function HomePage() {
 
   const magal = events.find(e => e.id === 'magal_touba');
   const spotsLeft = magal ? magal.spots_left : '—';
-  const activeWeeks = weeks.filter(w => w.id !== 'w0');
+  const closedWeeks = weeks.filter(w => w.is_closed);
+  const activeWeeks = weeks.filter(w => !w.is_closed);
 
   useEffect(() => {
     if (user && pendingAction) {
@@ -97,16 +98,18 @@ export default function HomePage() {
         </div>
 
         <div className="calendar-wrap">
-          <div className="closed-week">
-            <span style={{ fontSize: '1.2rem' }}>🔒</span>
-            <div style={{ flex: 1 }}>
-              <strong style={{ fontSize: '0.85rem' }}>1er – 7 Juin 2026 · Semaine bouclée</strong>
-              <span style={{ display: 'block', fontSize: '0.72rem', color: 'var(--gray)', marginTop: '0.2rem' }}>
-                12/12 commandes atteintes · Fermée aux nouvelles réservations
-              </span>
+          {closedWeeks.map(week => (
+            <div className="closed-week" key={week.id}>
+              <span style={{ fontSize: '1.2rem' }}>🔒</span>
+              <div style={{ flex: 1 }}>
+                <strong style={{ fontSize: '0.85rem' }}>{week.label} · Semaine bouclée</strong>
+                <span style={{ display: 'block', fontSize: '0.72rem', color: 'var(--gray)', marginTop: '0.2rem' }}>
+                  {week.order_count}/{week.max_orders} commandes enregistrées · Fermée aux nouvelles réservations
+                </span>
+              </div>
+              <span className="badge badge-confirmed">Bouclée</span>
             </div>
-            <span className="badge badge-confirmed">Complet</span>
-          </div>
+          ))}
 
           {activeWeeks.map(week => {
             const pct = Math.min(100, Math.round((week.order_count / week.max_orders) * 100));

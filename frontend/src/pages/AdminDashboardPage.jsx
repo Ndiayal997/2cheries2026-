@@ -40,6 +40,12 @@ export default function AdminDashboardPage() {
     refetchInterval: 15000,
   });
 
+  const { data: weeks = [], isLoading: lWeeks } = useQuery({
+    queryKey: ['weeks'],
+    queryFn: () => api.get('/weeks').then(r => r.data),
+    refetchInterval: 30000,
+  });
+
   const { data: eventOrders = [], isLoading: lEvent } = useQuery({
     queryKey: ['adminEventOrders'],
     queryFn: () => api.get('/events/orders/all').then(r => r.data),
@@ -56,9 +62,9 @@ export default function AdminDashboardPage() {
     mutationFn: ({ orderId, status, admin_note }) =>
       api.patch('/weeks/orders/' + orderId + '/status', { status, admin_note }),
     onSuccess: () => {
-      qc.invalidateQueries(['adminWeekOrders']);
-      qc.invalidateQueries(['adminStats']);
-      qc.invalidateQueries(['weeks']);
+      qc.invalidateQueries({ queryKey: ['adminWeekOrders'] });
+      qc.invalidateQueries({ queryKey: ['adminStats'] });
+      qc.invalidateQueries({ queryKey: ['weeks'] });
       toast.success('Statut mis à jour');
     },
     onError: (err) => toast.error(err.error || 'Erreur'),
@@ -68,9 +74,9 @@ export default function AdminDashboardPage() {
     mutationFn: ({ orderId, status, admin_note }) =>
       api.patch('/events/orders/' + orderId + '/status', { status, admin_note }),
     onSuccess: () => {
-      qc.invalidateQueries(['adminEventOrders']);
-      qc.invalidateQueries(['adminStats']);
-      qc.invalidateQueries(['events']);
+      qc.invalidateQueries({ queryKey: ['adminEventOrders'] });
+      qc.invalidateQueries({ queryKey: ['adminStats'] });
+      qc.invalidateQueries({ queryKey: ['events'] });
       toast.success('Statut mis à jour');
     },
     onError: (err) => toast.error(err.error || 'Erreur'),
@@ -78,7 +84,18 @@ export default function AdminDashboardPage() {
 
   const toggleClient = useMutation({
     mutationFn: (id) => api.patch('/admin/clients/' + id + '/toggle'),
-    onSuccess: () => { qc.invalidateQueries(['adminClients']); toast.success('Client mis à jour'); },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['adminClients'] }); toast.success('Client mis à jour'); },
+    onError: (err) => toast.error(err.error || 'Erreur'),
+  });
+
+  const toggleWeekClosure = useMutation({
+    mutationFn: ({ weekId, isClosed }) =>
+      api.patch('/weeks/' + weekId + '/closure', { is_closed: isClosed }),
+    onSuccess: (_data, variables) => {
+      qc.invalidateQueries({ queryKey: ['weeks'] });
+      qc.invalidateQueries({ queryKey: ['adminWeekOrders'] });
+      toast.success(variables.isClosed ? 'Semaine bouclée' : 'Semaine rouverte');
+    },
     onError: (err) => toast.error(err.error || 'Erreur'),
   });
 
@@ -97,9 +114,16 @@ export default function AdminDashboardPage() {
     const fn = type === 'week' ? updateWeekStatus : updateEventStatus;
     fn.mutate({ orderId: id, status: 'wave_sent' });
   };
+  const setWeekClosure = (week) => {
+    const nextClosed = !week.is_closed;
+    const action = nextClosed ? 'boucler' : 'rouvrir';
+    if (!window.confirm('Voulez-vous ' + action + ' la semaine "' + week.label + '" ?')) return;
+    toggleWeekClosure.mutate({ weekId: week.id, isClosed: nextClosed });
+  };
 
   const tabs = [
     { id: 'orders', label: 'Commandes (' + weekOrders.length + ')' },
+    { id: 'weeks', label: 'Semaines (' + weeks.length + ')' },
     { id: 'events', label: 'Événements (' + eventOrders.length + ')' },
     { id: 'clients', label: 'Clients (' + clients.length + ')' },
   ];
@@ -116,7 +140,7 @@ export default function AdminDashboardPage() {
           {tabs.map(t => (
             <button key={t.id} className={'admin-sidebar-btn ' + (tab === t.id ? 'active' : '')}
               onClick={() => setTab(t.id)}>
-              {t.id === 'orders' ? '📅' : t.id === 'events' ? '🌟' : '👥'}
+              {t.id === 'orders' ? '📅' : t.id === 'weeks' ? '▣' : t.id === 'events' ? '🌟' : '👥'}
               <span style={{ marginLeft: '0.6rem', fontSize: '0.75rem' }}>{t.label}</span>
             </button>
           ))}
@@ -214,6 +238,45 @@ export default function AdminDashboardPage() {
                   ))}
                 </tbody>
               </table>
+            </div>}
+          </div>
+        )}
+
+        {/* ── Panel: Weeks ── */}
+        {tab === 'weeks' && (
+          <div className="admin-panel">
+            <div className="admin-panel-title">Gestion des semaines</div>
+            {lWeeks ? <div style={{ padding: '2rem', textAlign: 'center' }}><div className="spinner" /></div> :
+            weeks.length === 0 ? <p className="admin-empty">Aucune semaine.</p> :
+            <div className="admin-weeks-grid">
+              {weeks.map(week => {
+                const pct = Math.min(100, Math.round((week.order_count / week.max_orders) * 100));
+                return (
+                  <div key={week.id} className={'admin-week-card ' + (week.is_closed ? 'is-closed' : '')}>
+                    <div className="admin-week-card-head">
+                      <div>
+                        <div className="admin-week-label">Semaine du {week.label}</div>
+                        <div className="admin-week-meta">
+                          {week.order_count}/{week.max_orders} commandes
+                        </div>
+                      </div>
+                      <span className={'badge ' + (week.is_closed ? 'badge-cancelled' : week.is_full ? 'badge-full' : 'badge-open')}>
+                        {week.is_closed ? 'Bouclée' : week.is_full ? 'Complète' : week.is_current_open ? 'Ouverte' : 'À venir'}
+                      </span>
+                    </div>
+                    <div className="admin-week-progress">
+                      <span style={{ width: pct + '%' }} />
+                    </div>
+                    <button
+                      className={'admin-week-action ' + (week.is_closed ? 'reopen' : 'close')}
+                      disabled={toggleWeekClosure.isPending}
+                      onClick={() => setWeekClosure(week)}
+                    >
+                      {week.is_closed ? 'Rouvrir la semaine' : 'Boucler la semaine'}
+                    </button>
+                  </div>
+                );
+              })}
             </div>}
           </div>
         )}

@@ -238,7 +238,7 @@ Mot de passe : Dk9$3vR!q7TmP2hZ
 - **12 commandes max par semaine** (régulières)
 - **30–40 places par événement spécial** (ne comptent pas dans les 12)
 - La semaine suivante n'ouvre que quand la précédente est complète
-- La semaine du **1–7 juin 2026** est bouclée (fermée)
+- Les semaines du **1–7 juin 2026** et du **8–14 juin 2026** sont bouclées (fermées)
 - **Magal de Touba** : 30 places, ouverture jusqu'au 20 juillet, événement le 2 août
 - Confirmation : le client envoie **50% du montant** par Wave au **78 157 32 91**
 - L'admin confirme manuellement après vérification du paiement

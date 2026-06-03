@@ -39,6 +39,39 @@ router.get('/', async (req, res) => {
   }
 });
 
+// ─── PATCH /api/weeks/:weekId/closure (admin) ─────────────
+router.patch('/:weekId/closure', requireAdmin, [
+  body('is_closed').isBoolean().withMessage('Statut de fermeture invalide').toBoolean(),
+], async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ error: errors.array()[0].msg });
+  }
+
+  const { weekId } = req.params;
+  const { is_closed } = req.body;
+
+  try {
+    const { rows } = await pool.query(
+      `UPDATE weeks
+       SET is_closed = $1
+       WHERE id = $2
+       RETURNING *`,
+      [is_closed, weekId]
+    );
+
+    if (!rows.length) return res.status(404).json({ error: 'Semaine introuvable' });
+
+    res.json({
+      message: is_closed ? 'Semaine bouclée' : 'Semaine rouverte',
+      week: rows[0],
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
+});
+
 // ─── POST /api/weeks/:weekId/reserve ──────────────────────
 router.post('/:weekId/reserve', requireAuth, [
   body('description').trim().notEmpty().withMessage('Description requise'),

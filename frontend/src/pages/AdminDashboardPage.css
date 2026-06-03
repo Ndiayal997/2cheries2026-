@@ -178,6 +178,88 @@
   text-align: center;
 }
 
+.admin-weeks-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+  padding: 1.5rem;
+}
+
+.admin-week-card {
+  border: 1px solid var(--gray-light);
+  background: var(--white);
+  border-radius: 4px;
+  padding: 1rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.admin-week-card.is-closed {
+  background: rgba(120, 53, 15, 0.04);
+}
+
+.admin-week-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.admin-week-label {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--bordeaux-deep);
+}
+
+.admin-week-meta {
+  margin-top: 0.2rem;
+  font-size: 0.72rem;
+  color: var(--gray);
+}
+
+.admin-week-progress {
+  height: 7px;
+  background: var(--cream);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+
+.admin-week-progress span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--gold), var(--bordeaux-pale));
+}
+
+.admin-week-action {
+  width: 100%;
+  border: none;
+  border-radius: 3px;
+  padding: 0.65rem 0.9rem;
+  cursor: pointer;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.admin-week-action.close {
+  background: var(--bordeaux-deep);
+  color: var(--white);
+}
+
+.admin-week-action.reopen {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.admin-week-action:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
 /* ── Mobile Responsive ── */
 
 @media (max-width: 991px) {
@@ -212,6 +294,11 @@
     text-align: center;
     padding: 0.6rem 0.3rem;
     font-size: 0.62rem;
+  }
+
+  .admin-weeks-grid {
+    grid-template-columns: 1fr;
+    padding: 1rem;
   }
 }
 
