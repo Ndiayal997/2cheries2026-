@@ -38,11 +38,13 @@ router.post('/orders/manual', requireAdmin, upload.array('photos', 5), async (re
     
     if (clientRes.rows.length) {
       clientId = clientRes.rows[0].id;
+      // Optionnel : mettre à jour le nom si différent
+      await client.query('UPDATE clients SET name = $1 WHERE id = $2', [client_name, clientId]);
     } else {
       // Créer un client par défaut (PAS d'email requis)
       const dummyPass = await bcrypt.hash(Math.random().toString(36), 10);
       const newClientRes = await client.query(
-        'INSERT INTO clients (name, phone, password_hash, email) VALUES ($1, $2, $3, NULL) RETURNING id',
+        'INSERT INTO clients (name, phone, password_hash) VALUES ($1, $2, $3) RETURNING id',
         [client_name, client_phone, dummyPass]
       );
       clientId = newClientRes.rows[0].id;
@@ -50,22 +52,27 @@ router.post('/orders/manual', requireAdmin, upload.array('photos', 5), async (re
 
     // 2. Créer la commande
     let query, params;
-    const wave_amount = Math.ceil((parseFloat(amount) || 0) / 2);
+    const cleanAmount = parseFloat(amount) || 0;
+    const wave_amount = Math.ceil(cleanAmount / 2);
 
     if (event_id && event_id !== 'null' && event_id !== '') {
       query = `INSERT INTO event_orders (client_id, event_id, description, amount, wave_amount, status, images, order_date)
                VALUES ($1, $2, $3, $4, $5, 'confirmed', $6, $7) RETURNING *`;
-      params = [clientId, event_id, description, amount || 0, wave_amount, JSON.stringify(imageUrls), order_date || new Date()];
+      params = [clientId, event_id, description, cleanAmount, wave_amount, JSON.stringify(imageUrls), order_date || new Date()];
     } else {
       query = `INSERT INTO orders (client_id, week_id, description, amount, wave_amount, status, images, order_date)
                VALUES ($1, $2, $3, $4, $5, 'confirmed', $6, $7) RETURNING *`;
-      params = [clientId, week_id, description, amount || 0, wave_amount, JSON.stringify(imageUrls), order_date || new Date()];
+      params = [clientId, week_id, description, cleanAmount, wave_amount, JSON.stringify(imageUrls), order_date || new Date()];
     }
 
     const { rows } = await client.query(query, params);
     await client.query('COMMIT');
 
-    res.status(201).json({ message: 'Commande manuelle créée', order: rows[0] });
+    res.status(201).json({ 
+      message: 'Commande et client créés avec succès', 
+      order: rows[0],
+      clientId 
+    });
   } catch (err) {
     await client.query('ROLLBACK');
     console.error('Manual order error:', err);
