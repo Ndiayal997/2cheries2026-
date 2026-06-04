@@ -96,12 +96,12 @@ const migrate = async () => {
 
       -- ─── TRIGGER updated_at ───────────────────────────────
       CREATE OR REPLACE FUNCTION update_updated_at()
-      RETURNS TRIGGER AS 79086
+      RETURNS TRIGGER AS $$
       BEGIN
         NEW.updated_at = NOW();
         RETURN NEW;
       END;
-      79086 LANGUAGE plpgsql;
+      $$ LANGUAGE plpgsql;
 
       DROP TRIGGER IF EXISTS trg_clients_updated ON clients;
       CREATE TRIGGER trg_clients_updated
