@@ -34,7 +34,7 @@ router.post('/orders/manual', requireAdmin, upload.array('photos', 5), async (re
 
     // 1. Trouver ou créer le client
     let clientId;
-    const clientRes = await client.query('SELECT id FROM clients WHERE phone = ', [client_phone]);
+    const clientRes = await client.query('SELECT id FROM clients WHERE phone = $1', [client_phone]);
     
     if (clientRes.rows.length) {
       clientId = clientRes.rows[0].id;
@@ -42,7 +42,7 @@ router.post('/orders/manual', requireAdmin, upload.array('photos', 5), async (re
       // Créer un client par défaut (PAS d'email requis)
       const dummyPass = await bcrypt.hash(Math.random().toString(36), 10);
       const newClientRes = await client.query(
-        'INSERT INTO clients (name, phone, password_hash, email) VALUES (, , , NULL) RETURNING id',
+        'INSERT INTO clients (name, phone, password_hash, email) VALUES ($1, $2, $3, NULL) RETURNING id',
         [client_name, client_phone, dummyPass]
       );
       clientId = newClientRes.rows[0].id;
