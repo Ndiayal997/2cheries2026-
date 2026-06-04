@@ -158,7 +158,7 @@ export default function HomePage() {
                 </button>
                 <div style={{ textAlign: 'center', fontSize: '0.65rem', color: 'var(--gray)', marginTop: '0.6rem' }}>
                   Clôture : {event.deadline}
-                </button>
+                </div>
               </div>
             </div>
           ))}
