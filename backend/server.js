@@ -15,21 +15,20 @@ app.use(cors({
   origin: true,
   credentials: true, methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
 }));
-app.use(express.json({ limit: '10kb' }));
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use('/uploads', express.static('uploads'));
 // Rate limiting global
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100,
+  max: 1000,
   message: { error: 'Trop de requêtes, réessayez dans 15 minutes' },
 });
-app.use('/api/', limiter);
 
 // Rate limiting plus strict sur auth
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 10,
+  max: 100,
   message: { error: 'Trop de tentatives, réessayez dans 15 minutes' },
 });
 app.use('/api/auth/login', authLimiter);
